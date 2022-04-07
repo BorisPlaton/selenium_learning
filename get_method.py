@@ -1,31 +1,66 @@
+import unittest
+
+from selenium import webdriver
 import time
 
-# webdriver это и есть набор команд для управления браузером
-from selenium import webdriver
+from selenium.webdriver.common.by import By
 
-# инициализируем драйвер браузера. После этой команды вы должны увидеть новое открытое окно браузера
-driver = webdriver.Chrome()
 
-# команда time.sleep устанавливает паузу в 5 секунд, чтобы мы успели увидеть, что происходит в браузере
+class TestCase(unittest.TestCase):
 
-# Метод get сообщает браузеру, что нужно открыть сайт по указанной ссылке
-driver.get("https://stepik.org/lesson/25969/step/12")
-time.sleep(5)
+    def setUp(self) -> None:
+        self.link = "http://suninjuly.github.io/registration2.html"
+        self.browser = webdriver.Chrome()
 
-# Метод find_element_by_css_selector позволяет найти нужный элемент на сайте, указав путь к нему. Способы поиска элементов мы обсудим позже
-# Ищем поле для ввода текста
-textarea = driver.find_element_by_css_selector(".textarea")
+    def tearDown(self) -> None:
+        self.browser.quit()
 
-# Напишем текст ответа в найденное поле
-textarea.send_keys("get()")
-time.sleep(5)
+    def test_successful_registration_only_with_required_fields(self):
+        self.browser.get(self.link)
+        input_form = self.browser.find_element(By.CSS_SELECTOR, "div.first_block div.first_class input")
+        input_form.send_keys('Kirill')
+        input_form = self.browser.find_element(By.CSS_SELECTOR, "div.first_block div.second_class input")
+        input_form.send_keys('Panchenko')
+        input_form = self.browser.find_element(By.CSS_SELECTOR, "div.first_block div.third_class input")
+        input_form.send_keys('email@email.com')
+        button = self.browser.find_element(By.TAG_NAME, "button")
+        button.click()
 
-# Найдем кнопку, которая отправляет введенное решение
-submit_button = driver.find_element_by_css_selector(".submit-submission")
+        time.sleep(1)
 
-# Скажем драйверу, что нужно нажать на кнопку. После этой команды мы должны увидеть сообщение о правильном ответе
-submit_button.click()
-time.sleep(5)
+        answer = self.browser.find_element(By.TAG_NAME, "h1")
+        self.assertEqual(answer.text, "Congratulations! You have successfully registered!")
 
-# После выполнения всех действий мы должны не забыть закрыть окно браузера
-driver.quit()
+    def test_successful_registration_with_all_fields(self):
+        self.browser.get(self.link)
+        input_form = self.browser.find_element(By.CSS_SELECTOR, "div.first_block div.first_class input")
+        input_form.send_keys('Kirill')
+        input_form = self.browser.find_element(By.CSS_SELECTOR, "div.first_block div.second_class input")
+        input_form.send_keys('Panchenko')
+        input_form = self.browser.find_element(By.CSS_SELECTOR, "div.first_block div.third_class input")
+        input_form.send_keys('email@email.com')
+        input_form = self.browser.find_element(By.CSS_SELECTOR, "div.second_block div.first_class input")
+        input_form.send_keys('666666666667')
+        input_form = self.browser.find_element(By.CSS_SELECTOR, "div.second_block div.second_class input")
+        input_form.send_keys('Mongolia, NY')
+        button = self.browser.find_element(By.TAG_NAME, "button")
+        button.click()
+
+        time.sleep(1)
+
+        answer = self.browser.find_element(By.TAG_NAME, "h1")
+        self.assertEqual(answer.text, "Congratulations! You have successfully registered!")
+
+    def test_successful_registration_without_required_fields(self):
+        self.browser.get(self.link)
+        input_form = self.browser.find_element(By.CSS_SELECTOR, "div.second_block div.first_class input")
+        input_form.send_keys('666666666667')
+        input_form = self.browser.find_element(By.CSS_SELECTOR, "div.second_block div.second_class input")
+        input_form.send_keys('Mongolia, NY')
+        button = self.browser.find_element(By.TAG_NAME, "button")
+        button.click()
+
+        time.sleep(1)
+
+        answer = self.browser.find_element(By.TAG_NAME, "h1")
+        self.assertEqual(answer.text, "Registration")
