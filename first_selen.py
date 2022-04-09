@@ -7,6 +7,8 @@ import time
 
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.select import Select
+from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.support import expected_conditions
 
 
 def calc(x):
@@ -17,11 +19,23 @@ class TestCase(unittest.TestCase):
 
     def setUp(self) -> None:
         self.browser = webdriver.Chrome()
-        self.browser.implicitly_wait(3)
+        self.browser.implicitly_wait(5)
 
     def tearDown(self) -> None:
         time.sleep(5)
         self.browser.quit()
+
+    def test_successful_registration_without_required_fields(self):
+        link = "http://suninjuly.github.io/registration2.html"
+        self.browser.get(link)
+        input_form = self.browser.find_element(By.CSS_SELECTOR, "div.second_block div.first_class input")
+        input_form.send_keys('666666666667')
+        input_form = self.browser.find_element(By.CSS_SELECTOR, "div.second_block div.second_class input")
+        input_form.send_keys('Mongolia, NY')
+        button = self.browser.find_element(By.TAG_NAME, "button")
+        button.click()
+        answer = self.browser.find_element(By.TAG_NAME, "h1")
+        self.assertEqual(answer.text, "Registration")
 
     def test_one(self):
         link = "http://suninjuly.github.io/math.html"
@@ -43,7 +57,6 @@ class TestCase(unittest.TestCase):
         valuex = img.get_attribute("valuex")
         x = calc(valuex)
         input_form = self.browser.find_element(By.ID, "answer")
-        print(valuex)
         input_form.send_keys(x)
         checkbox = self.browser.find_element(By.ID, 'robotCheckbox')
         checkbox.click()
@@ -93,3 +106,36 @@ class TestCase(unittest.TestCase):
         path = os.path.abspath('file.txt')
         input_form.send_keys(path)
         self.browser.find_element(By.TAG_NAME, "button").click()
+
+    def test_alert(self):
+        link = 'http://suninjuly.github.io/alert_accept.html'
+        self.browser.get(link)
+        button = self.browser.find_element(By.TAG_NAME, 'button')
+        button.click()
+        confirm = self.browser.switch_to.alert
+        confirm.accept()
+        x = self.browser.find_element(By.ID, "input_value").text
+        input_frame = self.browser.find_element(By.ID, "answer")
+        input_frame.send_keys(calc(x))
+        self.browser.find_element(By.TAG_NAME, "button").click()
+
+    def test_switch_to_new_window(self):
+        link = "http://suninjuly.github.io/redirect_accept.html"
+        self.browser.get(link)
+        self.browser.find_element(By.TAG_NAME, "button").click()
+        self.browser.switch_to.window(self.browser.window_handles[1])
+        x = self.browser.find_element(By.ID, "input_value").text
+        input_frame = self.browser.find_element(By.ID, "answer")
+        input_frame.send_keys(calc(x))
+        self.browser.find_element(By.TAG_NAME, "button").click()
+
+    def test_buy_house(self):
+        link = 'http://suninjuly.github.io/explicit_wait2.html'
+        self.browser.get(link)
+        WebDriverWait(self.browser, 12).until(
+            expected_conditions.text_to_be_present_in_element((By.ID, "price"), "$100"))
+        self.browser.find_element_by_id('book').click()
+        x = self.browser.find_element(By.ID, "input_value").text
+        input_frame = self.browser.find_element(By.ID, "answer")
+        input_frame.send_keys(calc(x))
+        self.browser.find_element(By.ID, "solve").click()
