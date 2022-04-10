@@ -39,7 +39,7 @@ class TestCase(unittest.TestCase):
 
     def test_one(self):
         link = "http://suninjuly.github.io/math.html"
-        self.browser.get("http://suninjuly.github.io/math.html")
+        self.browser.get(link)
         x = self.browser.find_element(By.ID, "input_value").text
         input_form = self.browser.find_element(By.ID, "answer")
         input_form.send_keys(calc(x))
@@ -139,3 +139,4 @@ class TestCase(unittest.TestCase):
         input_frame = self.browser.find_element(By.ID, "answer")
         input_frame.send_keys(calc(x))
         self.browser.find_element(By.ID, "solve").click()
+
